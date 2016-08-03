@@ -1,8 +1,8 @@
 {
 	"conf": {
 		"host": "school.aliens.pro",
-		"user": "aliens",
-		"password": "zF9x0yML",
+		"user": "test",
+		"password": "zF9x0yML9",
 		"parallel": "10"
 	},
 	"files": [
