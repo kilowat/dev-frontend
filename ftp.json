@@ -7,7 +7,5 @@
 	},
 	"files": [
 		"app/**/*.*"
-	],
-	"pathToServer": "/school/public_html"
-
+	]
 }

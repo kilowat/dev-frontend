@@ -9,7 +9,11 @@ const
     pattern: "*"
   }),
   gulp = require('gulp'),
-  fs = require('fs');
+  fs = require('fs'),
+  ftp = require("./ftp.json");
+
+var env = process.env.NODE_ENV || 'ftp';
+var conn = plugins.vinylFtp.create(ftp.conf);  
 
 var libsPath = {
   bootstrap: {
@@ -71,7 +75,7 @@ var libsPath = {
 
 //set what your want use
 var libs = {
-  //jquery: libsPath.jquery, // inject name jquery
+  jquery: libsPath.jquery, // inject name jquery
   // susy: libsPath.susy,
   // breakpoint: libsPath.breakpoint,
   // bourbon: libsPath.bourbon
@@ -79,10 +83,9 @@ var libs = {
   // slick: libsPath.slick, // inject name slick
   //fullpage:libsPath.fullpage, // inject name fullpage
 }
-var root = "app/";
+var root = "/school/public_html/";
 
 var path = {
-  root: "app/",
   build: {
     html: root,
     js: root + 'js/',
@@ -128,7 +131,7 @@ var configServer = {
   tunnel: false,
   host: 'localhost',
   logPrefix: "Frontend_Devil",
-  proxy: 'school.aliens.pro/app/',
+  proxy: 'school.aliens.pro/',
   port: 80,
   browser: "firefox"
 };
@@ -138,7 +141,7 @@ function clean() {
 
   return plugins.del(root + '*');
 }
-
+/*
 function html_build() {
 
   return gulp.src(path.src.html)
@@ -151,6 +154,20 @@ function html_build() {
     .pipe(gulp.dest(path.build.html))
     .pipe(plugins.browserSync.stream());
 }
+*/
+function html_build() {
+
+  return gulp.src(path.src.html)
+   .pipe(plugins.newer(path.src.html))
+    .pipe(plugins.swig(swigOpt).on('error', plugins.notify.onError(function (e) {
+      console.log(e);
+      return "AHTUNG TWIG ERROR!!"
+    })))
+    .pipe(plugins.remember('html'))
+    .pipe(plugins.if(env === "ftp", conn.dest(root)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.html)))
+    .pipe(plugins.browserSync.stream());
+}
 
 function js_build() {
 
@@ -158,7 +175,8 @@ function js_build() {
 	.pipe(plugins.newer(path.src.js))
     .pipe(plugins.rigger())
     .pipe(plugins.remember('js'))
-    .pipe(gulp.dest(path.build.js))
+    .pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.js)))
     .pipe(plugins.browserSync.stream());
 }
 
@@ -175,7 +193,8 @@ function style_build() {
       cascade: false
     }))
     .pipe(plugins.remember('style'))
-    .pipe(gulp.dest(path.build.css))
+    .pipe(plugins.if(env === "ftp", conn.dest(path.build.css)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.css)))
     .pipe(plugins.browserSync.stream());
 }
 
@@ -194,7 +213,8 @@ function image_build() {
       interlaced: true
     }))
     .pipe(plugins.remember('image'))
-    .pipe(gulp.dest(path.build.img))
+    .pipe(plugins.if(env === "ftp", conn.dest(path.build.img)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
     .pipe(plugins.browserSync.stream());
 }
 
@@ -203,7 +223,7 @@ function sprite_build() {
   var spriteData = gulp.src('src/sprites/*.png')
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
-      imgName: '../images/sprite.png',
+      imgName: root+'/images/sprite.png',
       cssName: '_sprite.scss',
       cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
       cssOpts: {
@@ -216,15 +236,19 @@ function sprite_build() {
         }
       }
     }));
-  spriteData.pipe(plugins.remember('sprite'))
-  spriteData.img.pipe(gulp.dest(path.build.img));
+   spriteData.pipe(plugins.remember('sprite'))
+   spriteData.img.pipe(plugins.if(env === "ftp", conn.dest(root)))
+   spriteData.img.pipe(plugins.if(env === "local", gulp.dest(path.root)))
   return spriteData.css.pipe(gulp.dest(path.src.sprite));
 }
 
 function fonts_build() {
 
   return gulp.src(path.src.fonts)
+     .pipe(plugins.newer(path.build.fonts))
     .pipe(gulp.dest(path.build.fonts))
+    .pipe(plugins.if(env === "ftp", conn.dest(path.build.fonts)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.fonts)))
     .pipe(plugins.browserSync.stream());
 }
 
@@ -240,7 +264,10 @@ function lib_build(cb) {
           if (!fs.existsSync('src/style/libs/' + nameLib))
             gulp.src(path).pipe(gulp.dest('src/style/libs/'));
         } else {
-          gulp.src(path).pipe(gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'));
+          
+          gulp.src(path)
+          .pipe(plugins.if(env === "ftp", conn.dest(root+'/libs/' + nameLib + '/' + fileType + '/')))
+          .pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
         }
       }
     }
@@ -322,7 +349,6 @@ var build = gulp.series(
 );
 
 function upload() {
-  var ftp = require("./ftp.json");
   var conn = plugins.vinylFtp.create(ftp.conf);  
   var stream =  gulp.src(ftp.files, {
       base: '.',
@@ -366,9 +392,11 @@ exports.html_build = html_build;
 exports.js_build = js_build;
 exports.style_build = style_build;
 exports.image_build = image_build;
+exports.sprite_build = sprite_build;
 exports.fonts_build = fonts_build;
 exports.inc_build = inc_build;
 exports.lib_build = lib_build;
 exports.upload = upload;
+////////
 exports.default = gulp.series(build,
   gulp.parallel(watch, webserver));

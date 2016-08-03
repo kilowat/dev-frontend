@@ -1,19 +1,19 @@
-$icon-logo-name: 'icon-logo';
-$icon-logo-x: 0px;
-$icon-logo-y: 0px;
-$icon-logo-offset-x: 0px;
-$icon-logo-offset-y: 0px;
-$icon-logo-width: 177px;
-$icon-logo-height: 75px;
-$icon-logo-total-width: 177px;
-$icon-logo-total-height: 75px;
-$icon-logo-image: '../images/sprite.png';
-$icon-logo: (0px, 0px, 0px, 0px, 177px, 75px, 177px, 75px, '../images/sprite.png', 'icon-logo', );
-$spritesheet-width: 177px;
-$spritesheet-height: 75px;
-$spritesheet-image: '../images/sprite.png';
-$spritesheet-sprites: ($icon-logo, );
-$spritesheet: (177px, 75px, '../images/sprite.png', $spritesheet-sprites, );
+$we-name: 'we';
+$we-x: 0px;
+$we-y: 0px;
+$we-offset-x: 0px;
+$we-offset-y: 0px;
+$we-width: 9px;
+$we-height: 9px;
+$we-total-width: 9px;
+$we-total-height: 9px;
+$we-image: '/school/public_html//images/sprite.png';
+$we: (0px, 0px, 0px, 0px, 9px, 9px, 9px, 9px, '/school/public_html//images/sprite.png', 'we', );
+$spritesheet-width: 9px;
+$spritesheet-height: 9px;
+$spritesheet-image: '/school/public_html//images/sprite.png';
+$spritesheet-sprites: ($we, );
+$spritesheet: (9px, 9px, '/school/public_html//images/sprite.png', $spritesheet-sprites, );
 
 @mixin sprite-width($sprite) {
   width: nth($sprite, 5);
