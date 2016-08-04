@@ -312,7 +312,7 @@ function inc_build() {
       }));
     }
   }
-  return stream.pipe(gulp.dest('src/template/'));
+ return stream.pipe(gulp.dest('src/template/pages/'));
 }
 
 function webserver() {
