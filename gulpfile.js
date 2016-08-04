@@ -128,7 +128,7 @@ var configServer = {
   tunnel: false,
   host: 'localhost',
   logPrefix: "Frontend_Devil",
-  proxy: 'school.aliens.pro/',
+  proxy: 'project.local/',
   port: 80,
   browser: "firefox"
 };
@@ -138,20 +138,7 @@ function clean() {
 
   return plugins.del(root + '*');
 }
-/*
-function html_build() {
 
-  return gulp.src(path.src.html)
-   .pipe(plugins.newer(path.src.html))
-    .pipe(plugins.swig(swigOpt).on('error', plugins.notify.onError(function (e) {
-      console.log(e);
-      return "AHTUNG TWIG ERROR!!"
-    })))
-    .pipe(plugins.remember('html'))
-    .pipe(gulp.dest(path.build.html))
-    .pipe(plugins.browserSync.stream());
-}
-*/
 function html_build() {
 
   return gulp.src(path.src.html)
