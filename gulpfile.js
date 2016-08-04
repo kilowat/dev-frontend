@@ -222,7 +222,7 @@ function sprite_build() {
     }));
    spriteData.pipe(plugins.remember('sprite'))
    spriteData.img.pipe(plugins.if(env === "ftp", conn.dest(root)))
-   spriteData.img.pipe(plugins.if(env === "local", gulp.dest(path.root)))
+   spriteData.img.pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
   return spriteData.css.pipe(gulp.dest(path.src.sprite));
 }
 
