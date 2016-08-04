@@ -1,6 +1,3 @@
-//if your whant to custom libs scss, do not forget rename lib file in src/style/libs _*.scss  to *.scss :example _bootstrap to bootstrap!!!!!!!
-//set path to libs
-
 'use strict';
 
 const
