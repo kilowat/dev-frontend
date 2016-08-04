@@ -89,7 +89,8 @@ var path = {
     css: root + '/css/',
     img: root + '/images/',
     fonts: root + '/fonts/',
-    libs: root + '/libs/'
+    libs: root + '/libs/',
+    sprite: "../images/"
   },
   src: {
     html: 'src/template/pages/*.html',
@@ -207,7 +208,7 @@ function sprite_build() {
   var spriteData = gulp.src('src/sprites/*.png')
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
-      imgName: './sprite.png',
+      imgName: path.build.sprite+'/sprite.png',
       cssName: '_sprite.scss',
       cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
       cssOpts: {
