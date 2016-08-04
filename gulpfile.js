@@ -80,7 +80,7 @@ var libs = {
   // slick: libsPath.slick, // inject name slick
   //fullpage:libsPath.fullpage, // inject name fullpage
 }
-var root = "/school/public_html/";
+var root = "app/";
 
 var path = {
   build: {
