@@ -12,7 +12,7 @@ const
   fs = require('fs'),
   ftp = require("./ftp.json");
 
-var env = process.env.NODE_ENV || 'ftp';
+var env = process.env.NODE_ENV || 'local';
 var conn = plugins.vinylFtp.create(ftp.conf);  
 
 var libsPath = {
