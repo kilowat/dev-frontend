@@ -11,6 +11,7 @@ const
 
 var env = process.env.NODE_ENV || 'local';
 var conn = plugins.vinylFtp.create(ftp.conf);  
+var htmlBeautifyOptions = { "indent_size": 2};
 
 var libsPath = {
   bootstrap: {
@@ -148,6 +149,7 @@ function html_build() {
       console.log(e);
       return "AHTUNG TWIG ERROR!!"
     })))
+    .pipe(plugins.htmlBeautify(htmlBeautifyOptions))
     .pipe(plugins.remember('html'))
     .pipe(plugins.if(env === "ftp", conn.dest(root)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.html)))
