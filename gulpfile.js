@@ -143,7 +143,7 @@ function clean() {
 function html_build() {
 
   return gulp.src(path.src.html)
-   .pipe(plugins.newer(path.src.html))
+   .pipe(plugins.newer(path.build.html))
     .pipe(plugins.swig(swigOpt).on('error', plugins.notify.onError(function (e) {
       console.log(e);
       return "AHTUNG TWIG ERROR!!"
@@ -157,7 +157,7 @@ function html_build() {
 function js_build() {
 
   return gulp.src(path.src.js)
-	.pipe(plugins.newer(path.src.js))
+	.pipe(plugins.newer(path.build.js))
     .pipe(plugins.rigger())
     .pipe(plugins.remember('js'))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
