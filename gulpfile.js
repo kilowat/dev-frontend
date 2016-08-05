@@ -153,7 +153,7 @@ function html_build() {
     .pipe(plugins.remember('html'))
     .pipe(plugins.if(env === "ftp", conn.dest(root)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.html)))
-    .pipe(plugins.browserSync.stream());
+    .on('end', plugins.browserSync.reload);
 }
 
 function js_build() {
