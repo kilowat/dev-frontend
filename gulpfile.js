@@ -9,7 +9,7 @@ const
   fs = require('fs'),
   ftp = require("./ftp.json");
 
-var env = process.env.NODE_ENV || 'local';
+var env = process.env.NODE_ENV || 'ftp';
 var conn = plugins.vinylFtp.create(ftp.conf);  
 var htmlBeautifyOptions = { "indent_size": 2};
 
@@ -81,8 +81,7 @@ var libs = {
   // slick: libsPath.slick, // inject name slick
   //fullpage:libsPath.fullpage, // inject name fullpage
 }
-var root = "app/";
-
+var root = "/app";
 var path = {
   build: {
     html: root,
@@ -91,7 +90,8 @@ var path = {
     img: root + '/images/',
     fonts: root + '/fonts/',
     libs: root + '/libs/',
-    sprite: "../images/"
+    sprite: "./images/",
+	php: '/../test.site/',
   },
   src: {
     html: 'src/template/pages/*.html',
@@ -100,8 +100,9 @@ var path = {
     libStyle: 'src/style/libs/**/*.scss',
     img: 'src/images/**/*.*',
     fonts: 'src/fonts/**/*.*',
-    'libs': 'src/libs/**/*.*',
-    sprite: 'src/style/helpers/'
+    libs: 'src/libs/**/*.*',
+    sprite: 'src/style/helpers/',
+	php:'php/test.site/test.site/**/*.*'
   },
   watch: {
     html: 'src/**/*.html',
@@ -109,7 +110,8 @@ var path = {
     style: 'src/style/**/*.scss',
     img: 'src/images/**/*.*',
     fonts: 'src/fonts/**/*.*',
-    sprite: 'src/sprites/*.png'
+    sprite: 'src/sprites/*.png',
+	php:'php/*/**/*.php*'
   },
   clean: 'build'
 };
@@ -130,7 +132,7 @@ var configServer = {
   tunnel: false,
   host: 'localhost',
   logPrefix: "Frontend_Devil",
-  proxy: 'project.local/',
+  proxy: 'dev.bitrix',
   port: 80,
   browser: "firefox"
 };
@@ -155,7 +157,15 @@ function html_build() {
     .pipe(plugins.if(env === "local", gulp.dest(path.build.html)))
     .on('end', plugins.browserSync.reload);
 }
+function php_build() {
 
+  return gulp.src(path.src.php)
+   .pipe(plugins.newer(path.build.php))
+    .pipe(plugins.remember('php'))
+    .pipe(plugins.if(env === "ftp", conn.dest(path.build.php)))
+    .pipe(plugins.if(env === "local", gulp.dest(path.build.php)))
+    .on('end', plugins.browserSync.reload);
+}
 function js_build() {
 
   return gulp.src(path.src.js)
@@ -331,7 +341,7 @@ var build = gulp.series(
     style_build,
     js_build
   ),
-  inc_build,
+  inc_build
   html_build
 );
 
@@ -350,7 +360,9 @@ function watch() {
   gulp.watch(path.watch.html, html_build).on('unlink', function (filepath) {
     return plugins.remember.forget('html', plugins.resolvePath(filepath));
   });
-
+  gulp.watch(path.watch.php, php_build).on('unlink', function (filepath) {
+    return plugins.remember.forget('php', plugins.resolvePath(filepath));
+  });
   gulp.watch(path.watch.style, style_build).on('unlink', function (filepath) {
     return plugins.remember.forget('style', plugins.resolvePath(filepath));
   });
@@ -368,7 +380,6 @@ function watch() {
   });
   
   gulp.watch(path.watch.fonts, fonts_build);
-
 }
 
 exports.clean = clean;
@@ -376,6 +387,7 @@ exports.webserver = webserver;
 exports.build = build;
 exports.watch = watch;
 exports.html_build = html_build;
+exports.php_build = php_build;
 exports.js_build = js_build;
 exports.style_build = style_build;
 exports.image_build = image_build;
