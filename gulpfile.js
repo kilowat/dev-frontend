@@ -9,7 +9,7 @@ const
   fs = require('fs'),
   ftp = require("./ftp.json");
 
-var env = process.env.NODE_ENV || 'ftp';
+var env = process.env.NODE_ENV || 'local';
 var conn = plugins.vinylFtp.create(ftp.conf);  
 var htmlBeautifyOptions = { "indent_size": 2};
 
@@ -81,7 +81,7 @@ var libs = {
   // slick: libsPath.slick, // inject name slick
   //fullpage:libsPath.fullpage, // inject name fullpage
 }
-var root = "/app";
+var root = "app/";
 var path = {
   build: {
     html: root,
@@ -132,7 +132,7 @@ var configServer = {
   tunnel: false,
   host: 'localhost',
   logPrefix: "Frontend_Devil",
-  proxy: 'dev.bitrix',
+  proxy: 'app.test',
   port: 80,
   browser: "firefox"
 };
@@ -163,7 +163,6 @@ function php_build() {
    .pipe(plugins.newer(path.build.php))
     .pipe(plugins.remember('php'))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.php)))
-    .pipe(plugins.if(env === "local", gulp.dest(path.build.php)))
     .on('end', plugins.browserSync.reload);
 }
 function js_build() {
@@ -341,7 +340,7 @@ var build = gulp.series(
     style_build,
     js_build
   ),
-  inc_build
+  inc_build,
   html_build
 );
 
