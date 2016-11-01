@@ -3,35 +3,33 @@
 
 <head>
    <meta charset="utf-8">
-  <title>New project</title>
-  <!-- bootstrap:css -->
-  <!-- endinject -->
-
+  <title>{{ title }}</title>
   <!-- dev:css -->
+
   <link rel="stylesheet" href="./css/screen.css">
-  <link rel="stylesheet" href="./css/fonts/roboto/roboto.css">
+
   <!-- endinject -->
 </head>
 
 <body>
   <header>
-
+	{% include '../layouts/header.html' %}
   </header>
   <main> 
-	test 22
+	{% block content %}{% endblock %}
   </main>
   <footer>
-    
+    {% include '../layouts/footer.html' %}
   </footer>
   
   <!-- jquery:js -->
+  <script src="./libs/jquery/js/jquery.min.js"></script>
   <!-- endinject -->
   
-  <!-- bootstrap:js -->
-  <!-- endinject -->
- 
   <!-- dev:js -->
-  <script src="./js/main.js"></script>
+
+  <script src="./js/all.js"></script>
+
   <!-- endinject -->
 </body>
 

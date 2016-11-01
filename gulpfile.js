@@ -1,5 +1,4 @@
 'use strict';
-
 const
   gulpLoadPlugins = require('gulp-load-plugins'),
   plugins = gulpLoadPlugins({
@@ -9,137 +8,65 @@ const
   fs = require('fs'),
   ftp = require("./ftp.json");
 
-var env = process.env.NODE_ENV || 'local';
-var conn = plugins.vinylFtp.create(ftp.conf);  
+var env = process.env.NODE_ENV || 'local'; //local | ftp
+
+var buildType = 'min' // min | full
+
+var conn = plugins.vinylFtp.create(ftp.conf);
+
 var ignorinc = 'app';
-var htmlBeautifyOptions = { "indent_size": 2};
 
-var libsPath = {
-  bootstrap: {
-    js: [
-      'bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js'
-    ],
-    scss: [
-     'bower_components/bootstrap-sass/assets/stylesheets/**/*.*'
-    ],
-    css: [
-        'src/libs/bootstrap/css/**/*.*'
-      ],
-    fonts: ['bower_components/bootstrap-sass/assets/fonts/bootstrap/*.*']
-  },
-  jquery: {
-    js: [
-        'bower_components/jquery/dist/jquery.min.js'
-      ]
-  },
-  fancybox:{
-	  js: [
-		"src/libs/fancybox/js/jquery.fancybox.pack.js"
-	  ],
-	  css:[
-		"src/libs/fancybox/css/jquery.fancybox.css"
-	],
-	images:[
-		'src/libs/fancybox/images/blank.gif',
-		'src/libs/fancybox/images/fancybox_loading.gif',
-		'src/libs/fancybox/images/fancybox_loading@2x.gif',
-		'src/libs/fancybox/images/fancybox_overlay.png',
-		'src/libs/fancybox/images/fancybox_sprite.png',
-		'src/libs/fancybox/images/fancybox_sprite@2x.png',
-	]
-  },
-  slick: {
-    js: [
-        'bower_components/slick-carousel/slick/slick.min.js'
-      ],
-    css: [
-        'bower_components/slick-carousel/slick/slick.css',
-        'bower_components/slick-carousel/slick/slick-theme.css'
-      ],
-    fonts: [
-        'bower_components/slick-carousel/slick/fonts/*.*'
-      ],
-    images: [
-        'bower_components/slick-carousel/slick/ajax-loader.gif'
-      ]
-  },
-   select:{
-	  js:[
-		"src/libs/customselect/js/selectize.min.js"
-	  ]
-	},
-	cropper:{
-	  js:[
-		"src/libs/cropper/js/cropper.min.js"
-	  ],
-	  css:[
-		"src/libs/cropper/css/cropper.css"
-	  ]
-	},
-  fullpage: {
-    js: [
-        'bower_components/fullpage.js/dist/jquery.fullpage.min.js'
-      ],
-    css: [
-        'bower_components/fullpage.js/dist/jquery.fullpage.min.css'
-      ]
-  },
-  susy: {
-    scss: [
-      'bower_components/susy/sass/**/*.*'
-    ]
-  },
-  breakpoint: {
-    scss: [
-      'bower_components/breakpoint-sass/stylesheets/**/*.*'
-    ]
-  },
-  bourbon: {
-    scss: [
-      'bower_components/bourbon/app/assets/stylesheets/**/*.*'
-    ]
-  }
-}
+var htmlBeautifyOptions = {
+  "indent_size": 2
+};
 
-//set what your want use
+var libsPath = require('./gulp_map.json');
+
+//what do you want to use?
 var libs = {
+  susy: libsPath.susy, // use susy
   jquery: libsPath.jquery, // inject name jquery
-   susy: libsPath.susy,
-   //breakpoint: libsPath.breakpoint,
+  //breakpoint: libsPath.breakpoint,
   // bourbon: libsPath.bourbon
   // bootstrap: libsPath.bootstrap, // inject name bootstrap
-   //slick: libsPath.slick, // inject name slick
-   //select:libsPath.select,
-   //fancybox:libsPath.fancybox,
-   //cropper:libsPath.cropper,
+  //slick: libsPath.slick, // inject name slick
+  //select:libsPath.select,
+  //fancybox:libsPath.fancybox,
+  //cropper:libsPath.cropper,
   //fullpage:libsPath.fullpage, // inject name fullpage
 }
 var root = "./app/";
 
+var configServer = {
+  tunnel: false,
+  host: 'localhost',
+  logPrefix: "Frontend_Devil",
+  proxy: 'd.local',
+  port: 80,
+  browser: "firefox",
+};
+
 var path = {
   build: {
-	php: root+'php',
     html: root,
     js: root + 'js/',
     css: root + 'css/',
     img: root + 'images/',
     fonts: root + 'fonts/',
     libs: root + 'libs/',
-	sprite: "../images/",
+    sprite: "../images/",
   },
   src: {
-	php: 'src/php/*.*',
     html: 'src/template/pages/*.html',
     js: 'src/js/main.js',
     style: ['src/style/**/*.scss', '!src/style/libs/**/*.scss'],
     libStyle: 'src/style/libs/**/*.scss',
     img: 'src/images/**/*.*',
     fonts: 'src/fonts/**/*.*',
-    libs : 'src/libs/**/*.*',
+    libs: 'src/libs/**/*.*',
     sprite: 'src/style/helpers/'
   },
   watch: {
-	php: 'src/php/*.*',
     html: 'src/template/**/*.html',
     js: 'src/js/**/*.*',
     style: 'src/style/**/*.scss',
@@ -162,37 +89,21 @@ var sassOptions = {
   outputStyle: 'expanded'
 };
 
-var configServer = {
-  tunnel: false,
-  host: 'localhost',
-  logPrefix: "Frontend_Devil",
-  proxy: 'tachky.local',
-  port: 80,
-  browser: "firefox",
-};
-
 /*clear build directory*/
 function clean() {
 
   return plugins.del(root + '*');
 }
 
-function php_build(){
- return gulp.src(path.src.php)
-    .pipe(plugins.if(env === "ftp", conn.dest(path.build.php)))
-    .pipe(plugins.if(env === "local", gulp.dest(path.build.php)))
-    .on('end', plugins.browserSync.reload);
-}
-
 function html_build() {
 
   return gulp.src(path.src.html)
-   .pipe(plugins.newer(path.src.html))
+    .pipe(plugins.newer(path.src.html))
     .pipe(plugins.swig(swigOpt).on('error', plugins.notify.onError(function (e) {
       console.log(e);
       return "AHTUNG TWIG ERROR!!"
     })))
-	.pipe(plugins.htmlBeautify(htmlBeautifyOptions))
+    .pipe(plugins.htmlBeautify(htmlBeautifyOptions))
     .pipe(plugins.remember('html'))
     .pipe(plugins.if(env === "ftp", conn.dest(root)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.html)))
@@ -200,9 +111,10 @@ function html_build() {
 }
 
 function js_build() {
-
+	
   return gulp.src(path.src.js)
-    .pipe(plugins.rigger())
+    .pipe(plugins.if(buildType === "min", plugins.concat('all.js')))
+	.pipe(plugins.if(buildType === "min", plugins.jsmin()))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.js)))
     .pipe(plugins.browserSync.stream());
@@ -220,6 +132,7 @@ function style_build() {
       browsers: ['last 16 versions'],
       cascade: false
     }))
+    .pipe(plugins.if(buildType === "min", plugins.cssmin()))
     .pipe(plugins.remember('style'))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.css)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.css)))
@@ -251,7 +164,7 @@ function sprite_build() {
   var spriteData = gulp.src('src/sprites/*.png')
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
-      imgName: path.build.sprite+'sprite.png',
+      imgName: path.build.sprite + 'sprite.png',
       cssName: '_sprite.scss',
       cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
       cssOpts: {
@@ -264,9 +177,9 @@ function sprite_build() {
         }
       }
     }));
-   spriteData.pipe(plugins.remember('sprite'))
-   spriteData.img.pipe(plugins.if(env === "ftp", conn.dest(root)))
-   spriteData.img.pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
+  spriteData.pipe(plugins.remember('sprite'))
+  spriteData.img.pipe(plugins.if(env === "ftp", conn.dest(root)))
+  spriteData.img.pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
   return spriteData.css.pipe(gulp.dest(path.src.sprite));
 }
 
@@ -282,30 +195,28 @@ function fonts_build() {
 
 //install libs
 function lib_build(cb) {
+	   for (var item in libs) {
+		var nameLib = item;
+		for (var fileType in libs[item]) {
+		  for (var i = 0; libs[item][fileType].length > i; i++) {
+			var path = libs[item][fileType][i];
+			if (fileType === 'scss') {
+			  if (!fs.existsSync('src/style/libs/' + nameLib))
+				gulp.src(path).pipe(gulp.dest('src/style/libs/'));
+			} else {
 
-  for (var item in libs) {
-    var nameLib = item;
-    for (var fileType in libs[item]) {
-      for (var i = 0; libs[item][fileType].length > i; i++) {
-        var path = libs[item][fileType][i];
-        if (fileType === 'scss') {
-          if (!fs.existsSync('src/style/libs/' + nameLib))
-            gulp.src(path).pipe(gulp.dest('src/style/libs/'));
-        } else {
-          
-          gulp.src(path)
-          .pipe(plugins.if(env === "ftp", conn.dest(root+'/libs/' + nameLib + '/' + fileType + '/')))
-          .pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
-        }
-      }
-    }
-  }
-  cb();
+			  gulp.src(path)
+				.pipe(plugins.if(env === "ftp", conn.dest(root + '/libs/' + nameLib + '/' + fileType + '/')))
+				.pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
+			}
+		  }
+		}
+	  }
+ cb();
 }
-
 /*inject css js to index file*/
 function inc_build() {
-  var stream = gulp.src('src/template/layout/master.html')
+  var stream = gulp.src('src/template/layouts/master.html')
     .pipe(plugins.inject(gulp.src([
         root + 'js/**/*.js'
    ], {
@@ -326,35 +237,34 @@ function inc_build() {
       addPrefix: '.',
       addRootSlash: false
     }));
+	  for (var lib in libs) {
+		if (libs[lib].css !== undefined) {
+		  stream.pipe(plugins.inject(gulp.src([
+			  root + 'libs/' + lib + '/css/*.css'
+			], {
+			read: false
+		  }), {
+			name: lib,
+			ignorePath: ignorinc,
+			addPrefix: '.',
+			addRootSlash: false
+		  }));
+		}
 
-  for (var lib in libs) {
-    if (libs[lib].css !== undefined) {
-      stream.pipe(plugins.inject(gulp.src([
-          root + 'libs/' + lib + '/css/*.css'
-        ], {
-        read: false
-      }), {
-        name: lib,
-        ignorePath: ignorinc,
-        addPrefix: '.',
-        addRootSlash: false
-      }));
-    }
-
-    if (libs[lib].js !== undefined) {
-      stream.pipe(plugins.inject(gulp.src([
-         root + 'libs/' + lib + '/js/*.js'
-        ], {
-        read: false
-      }), {
-        name: lib,
-        ignorePath: ignorinc,
-        addPrefix: '.',
-        addRootSlash: false
-      }));
-    }
-  }
-  return stream.pipe(gulp.dest('src/template/layout/'));
+		if (libs[lib].js !== undefined) {
+		  stream.pipe(plugins.inject(gulp.src([
+			 root + 'libs/' + lib + '/js/*.js'
+			], {
+			read: false
+		  }), {
+			name: lib,
+			ignorePath: ignorinc,
+			addPrefix: '.',
+			addRootSlash: false
+		  }));
+		}
+	  }
+  return stream.pipe(gulp.dest('src/template/layouts/'));
 }
 
 function webserver() {
@@ -369,30 +279,26 @@ var build = gulp.series(
     fonts_build,
     image_build,
     style_build,
-    js_build,
-	php_build
+    js_build
   ),
-  //inc_build,
+  inc_build,
   html_build
 );
 
 function upload() {
-  var conn = plugins.vinylFtp.create(ftp.conf);  
-  var stream =  gulp.src(ftp.files, {
+  var conn = plugins.vinylFtp.create(ftp.conf);
+  var stream = gulp.src(ftp.files, {
       base: '.',
       buffer: true
     })
     .pipe(conn.dest(ftp.pathToServer));
-	return stream.pipe(plugins.browserSync.stream());
+  return stream.pipe(plugins.browserSync.stream());
 }
 
 function watch() {
 
   gulp.watch(path.watch.html, html_build).on('unlink', function (filepath) {
     return plugins.remember.forget('html', plugins.resolvePath(filepath));
-  });
-  gulp.watch(path.watch.php, php_build).on('unlink', function (filepath) {
-    return plugins.remember.forget('php', plugins.resolvePath(filepath));
   });
   gulp.watch(path.watch.style, style_build).on('unlink', function (filepath) {
     return plugins.remember.forget('style', plugins.resolvePath(filepath));
@@ -409,7 +315,7 @@ function watch() {
   gulp.watch(path.watch.sprite, sprite_build).on('unlink', function (filepath) {
     return plugins.remember.forget('sprite', plugins.resolvePath(filepath));
   });
-  
+
   gulp.watch(path.watch.fonts, fonts_build);
 
 }
@@ -418,7 +324,6 @@ exports.clean = clean;
 exports.webserver = webserver;
 exports.build = build;
 exports.watch = watch;
-exports.php = php_build;
 exports.html_build = html_build;
 exports.js_build = js_build;
 exports.style_build = style_build;
