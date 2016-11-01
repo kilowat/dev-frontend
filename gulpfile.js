@@ -10,7 +10,7 @@ const
 
 var env = process.env.NODE_ENV || 'local'; //local | ftp
 
-var buildType = 'min' // min | full
+var buildType = 'full' // min | full
 
 var conn = plugins.vinylFtp.create(ftp.conf);
 
@@ -195,6 +195,7 @@ function fonts_build() {
 
 //install libs
 function lib_build(cb) {
+	if(buildType === "full"){
 	   for (var item in libs) {
 		var nameLib = item;
 		for (var fileType in libs[item]) {
@@ -212,7 +213,28 @@ function lib_build(cb) {
 		  }
 		}
 	  }
+	}
+	if(buildType === "min"){
+		lib_contact_build()
+	}
  cb();
+}
+function lib_contact_build(){
+	gulp.src('src/libs/**/*.css')
+	.pipe(plugins.concat('libs.css'))
+	.pipe(plugins.cssmin())
+	.pipe(plugins.if(env === "ftp", conn.dest(path.build.css)))
+	.pipe(plugins.if(env === "local", gulp.dest(path.build.css)))
+	
+	gulp.src('src/libs/**/*.js')
+	.pipe(plugins.concat('libs.js'))
+	.pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
+	.pipe(plugins.if(env === "local", gulp.dest(path.build.js)))
+		
+	return 	gulp.src(['src/libs/**/*.png', 'src/libs/**/*.gif', 'src/libs/**/*.jpg', 'src/libs/**/*.svg'])
+	.pipe(plugins.flatten())
+	.pipe(plugins.if(env === "ftp", conn.dest(path.build.img)))
+	.pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
 }
 /*inject css js to index file*/
 function inc_build() {
@@ -332,6 +354,7 @@ exports.sprite_build = sprite_build;
 exports.fonts_build = fonts_build;
 exports.inc_build = inc_build;
 exports.lib_build = lib_build;
+exports.lib_contact_build = lib_contact_build;
 exports.upload = upload;
 ////////
 exports.default = gulp.series(build,
