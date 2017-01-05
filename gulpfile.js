@@ -24,17 +24,23 @@ var libsPath = require('./gulp_map.json');
 
 //what do you want to use?
 var libs = {
-  susy: libsPath.susy, // use susy
-  jquery: libsPath.jquery, // inject name jquery
-  //breakpoint: libsPath.breakpoint,
-  // bourbon: libsPath.bourbon
-  // bootstrap: libsPath.bootstrap, // inject name bootstrap
-  //slick: libsPath.slick, // inject name slick
-  //select:libsPath.select,
-  //fancybox:libsPath.fancybox,
-  //cropper:libsPath.cropper,
-  //fullpage:libsPath.fullpage, // inject name fullpage
-}
+  jquery: libsPath.jquery, 
+  susy: libsPath.susy,
+  drawer:libsPath.drawer,
+  bxslider:libsPath.bxslider,
+  raphael:libsPath.raphael,
+  msgBox:libsPath.msgBox,
+  breakpoint: libsPath.breakpoint,
+  bourbon: libsPath.bourbon,
+  bootstrap: libsPath.bootstrap,
+  slick: libsPath.slick, 
+  formValidator: libsPath.formValidator,
+  select:libsPath.select,
+  fancybox:libsPath.fancybox,
+  icheck:libsPath.icheck,
+  placeholder:libsPath.placeholder,
+  fullpage:libsPath.fullpage,
+};  
 var root = "./app/";
 
 var configServer = {
@@ -42,7 +48,7 @@ var configServer = {
   host: 'localhost',
   logPrefix: "Frontend_Devil",
   proxy: 'd.local',
-  port: 80,
+  port: 9000,
   browser: "firefox",
 };
 
@@ -258,34 +264,27 @@ function inc_build() {
       ignorePath: ignorinc,
       addPrefix: '.',
       addRootSlash: false
-    }));
-	  for (var lib in libs) {
-		if (libs[lib].css !== undefined) {
-		  stream.pipe(plugins.inject(gulp.src([
-			  root + 'libs/' + lib + '/css/*.css'
-			], {
-			read: false
-		  }), {
-			name: lib,
-			ignorePath: ignorinc,
-			addPrefix: '.',
-			addRootSlash: false
-		  }));
-		}
-
-		if (libs[lib].js !== undefined) {
-		  stream.pipe(plugins.inject(gulp.src([
-			 root + 'libs/' + lib + '/js/*.js'
-			], {
-			read: false
-		  }), {
-			name: lib,
-			ignorePath: ignorinc,
-			addPrefix: '.',
-			addRootSlash: false
-		  }));
-		}
-	  }
+    })).pipe(plugins.inject(gulp.src([
+        root + 'libs/**/*.js',"!"+root + 'libs/**/jquery.min.js'
+   ], {
+      read: false
+    }), {
+      name: 'libs',
+      ignorePath: ignorinc,
+      addPrefix: '.',
+      addRootSlash: false
+    }))
+    .pipe(plugins.inject(gulp.src([
+        root + 'libs/**/*.css'
+   ], {
+      read: false
+    }), {
+      name: 'libs',
+      ignorePath: ignorinc,
+      addPrefix: '.',
+      addRootSlash: false
+    }))
+	;
   return stream.pipe(gulp.dest('src/template/layouts/'));
 }
 
@@ -295,8 +294,8 @@ function webserver() {
 }
 
 var build = gulp.series(
-  sprite_build,
-  gulp.parallel(
+    sprite_build,
+    gulp.parallel(
     lib_build,
     fonts_build,
     image_build,
