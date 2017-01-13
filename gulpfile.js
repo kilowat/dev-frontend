@@ -24,7 +24,6 @@ var libsPath = require('./gulp_map.json');
 
 //what do you want to use?
 var libs = {
-  jquery: libsPath.jquery, 
   susy: libsPath.susy,
   //drawer:libsPath.drawer,
   //bxslider:libsPath.bxslider,
