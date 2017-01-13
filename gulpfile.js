@@ -211,7 +211,6 @@ function lib_build(cb) {
 			  if (!fs.existsSync('src/style/libs/' + nameLib))
 				gulp.src(path).pipe(gulp.dest('src/style/libs/'));
 			} else {
-
 			  gulp.src(path)
 				.pipe(plugins.if(env === "ftp", conn.dest(root + '/libs/' + nameLib + '/' + fileType + '/')))
 				.pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
