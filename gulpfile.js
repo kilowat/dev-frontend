@@ -170,9 +170,10 @@ function sprite_build() {
   var spriteData = gulp.src('src/sprites/*.png')
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
-      imgName: path.build.sprite + 'sprite.png',
+      imgName: 'sprite.png',
       cssName: '_sprite.scss',
       cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
+	  imgPath:path.build.sprite ,
       cssOpts: {
         cssSelector: function (item) {
           if (item.name.indexOf('-hover') !== -1) {
