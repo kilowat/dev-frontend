@@ -59,7 +59,7 @@ var path = {
     img: root + 'images/',
     fonts: root + 'fonts/',
     libs: root + 'libs/',
-    sprite: root+ "images/",
+    sprite: "./images/",
   },
   src: {
     html: 'src/template/pages/*.html',
