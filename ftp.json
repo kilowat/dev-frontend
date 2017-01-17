@@ -7,5 +7,6 @@
 	},
 	"files": [
 		"app/**/*.*"
-	]
+	],
+	"pathToServer":"/serv/public_html"
 }
