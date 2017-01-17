@@ -59,7 +59,7 @@ var path = {
     img: root + 'images/',
     fonts: root + 'fonts/',
     libs: root + 'libs/',
-    sprite: "../images/",
+    sprite: root+ "images/",
   },
   src: {
     html: 'src/template/pages/*.html',
@@ -170,9 +170,9 @@ function sprite_build() {
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
       imgName: 'sprite.png',
+      imgPath:path.build.sprite,
       cssName: '_sprite.scss',
-      cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
-	  imgPath:path.build.sprite ,
+      cssTemplate: 'src/style/helpers/_sprite_template.handlebars,
       cssOpts: {
         cssSelector: function (item) {
           if (item.name.indexOf('-hover') !== -1) {
