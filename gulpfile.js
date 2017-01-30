@@ -172,7 +172,7 @@ function sprite_build() {
       imgName: 'sprite.png',
       imgPath:path.build.sprite,
       cssName: '_sprite.scss',
-      cssTemplate: 'src/style/helpers/_sprite_template.handlebars,
+      cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
       cssOpts: {
         cssSelector: function (item) {
           if (item.name.indexOf('-hover') !== -1) {
