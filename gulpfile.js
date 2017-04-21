@@ -10,7 +10,7 @@ const
 
 var env = process.env.NODE_ENV || 'local'; //local | ftp
 
-var buildType = 'full' // min | full
+var buildType = 'min' // min | full
 
 var conn = plugins.vinylFtp.create(ftp.conf);
 
@@ -25,28 +25,29 @@ var libsPath = require('./gulp_map.json');
 //what do you want to use?
 var libs = {
   susy: libsPath.susy,
+  jquery:libsPath.jquery,
   //drawer:libsPath.drawer,
   //bxslider:libsPath.bxslider,
  // raphael:libsPath.raphael,
- // msgBox:libsPath.msgBox,
+  //msgBox:libsPath.msgBox,
   breakpoint: libsPath.breakpoint,
  // bourbon: libsPath.bourbon,
  // bootstrap: libsPath.bootstrap,
-  //slick: libsPath.slick, 
+//  slick: libsPath.slick,
   //formValidator: libsPath.formValidator,
   //select:libsPath.select,
-  //fancybox:libsPath.fancybox,
+  fancybox:libsPath.fancybox,
   //icheck:libsPath.icheck,
   //placeholder:libsPath.placeholder,
   //fullpage:libsPath.fullpage,
-};  
+};
 var root = "./app/";
 
 var configServer = {
   tunnel: false,
   host: 'localhost',
   logPrefix: "Frontend_Devil",
-  proxy: 'd.local',
+  proxy: 'dev-frontend.local',
   port: 9000,
   browser: "firefox",
 };
@@ -63,7 +64,7 @@ var path = {
   },
   src: {
     html: 'src/template/pages/*.html',
-    js: 'src/js/main.js',
+    js: 'src/js/**/*.*',
     style: ['src/style/**/*.scss', '!src/style/libs/**/*.scss'],
     libStyle: 'src/style/libs/**/*.scss',
     img: 'src/images/**/*.*',
@@ -116,13 +117,13 @@ function html_build() {
 }
 
 function js_build() {
-	
+
   return gulp.src(path.src.js)
     .pipe(plugins.if(buildType === "min", plugins.concat('all.js')))
-	.pipe(plugins.if(buildType === "min", plugins.jsmin()))
+	  .pipe(plugins.if(buildType === "min", plugins.jsmin()))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.js)))
-    .pipe(plugins.browserSync.stream());
+    .on('end', plugins.browserSync.reload);
 }
 
 function style_build() {
@@ -141,7 +142,7 @@ function style_build() {
     .pipe(plugins.remember('style'))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.css)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.css)))
-    .pipe(plugins.browserSync.stream());
+    .on('end', plugins.browserSync.reload);
 }
 
 function image_build() {
@@ -161,7 +162,7 @@ function image_build() {
     .pipe(plugins.remember('image'))
     .pipe(plugins.if(env === "ftp", conn.dest(path.build.img)))
     .pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
-    .pipe(plugins.browserSync.stream());
+    .on('end', plugins.browserSync.reload);
 }
 
 function sprite_build() {
@@ -172,16 +173,7 @@ function sprite_build() {
       imgName: 'sprite.png',
       imgPath:path.build.sprite,
       cssName: '_sprite.scss',
-      cssTemplate: 'src/style/helpers/_sprite_template.handlebars',
-      cssOpts: {
-        cssSelector: function (item) {
-          if (item.name.indexOf('-hover') !== -1) {
-            return '.icon-' + item.name.replace('-hover', ':hover');
-          } else {
-            return '.icon-' + item.name;
-          }
-        }
-      }
+      cssTemplate: 'src/style/helpers/_sprite_template.handlebars'
     }));
   spriteData.pipe(plugins.remember('sprite'))
   spriteData.img.pipe(plugins.if(env === "ftp", conn.dest(root)))
@@ -201,51 +193,29 @@ function fonts_build() {
 
 //install libs
 function lib_build(cb) {
-	if(buildType === "full"){
-	   for (var item in libs) {
+	 for (var item in libs) {
 		var nameLib = item;
 		for (var fileType in libs[item]) {
 		  for (var i = 0; libs[item][fileType].length > i; i++) {
-			var path = libs[item][fileType][i];
-			if (fileType === 'scss') {
-			  if (!fs.existsSync('src/style/libs/' + nameLib))
-				gulp.src(path).pipe(gulp.dest('src/style/libs/'));
-			} else {
-			  gulp.src(path)
-				.pipe(plugins.if(env === "ftp", conn.dest(root + '/libs/' + nameLib + '/' + fileType + '/')))
-				.pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
-			}
+  			var path = libs[item][fileType][i];
+  			if (fileType === 'scss') {
+  			  if (!fs.existsSync('src/style/libs/' + nameLib))
+  				gulp.src(path).pipe(gulp.dest('src/style/libs/'));
+  			} else {
+  			  gulp.src(path)
+  				.pipe(plugins.if(env === "ftp", conn.dest(root + '/libs/' + nameLib + '/' + fileType + '/')))
+  				.pipe(plugins.if(env === "local", (gulp.dest(root + 'libs/' + nameLib + '/' + fileType + '/'))))
+  			}
 		  }
 		}
-	  }
-	}
-	if(buildType === "min"){
-		lib_contact_build()
 	}
  cb();
-}
-function lib_contact_build(){
-	gulp.src('src/libs/**/*.css')
-	.pipe(plugins.concat('libs.css'))
-	.pipe(plugins.cssmin())
-	.pipe(plugins.if(env === "ftp", conn.dest(path.build.css)))
-	.pipe(plugins.if(env === "local", gulp.dest(path.build.css)))
-	
-	gulp.src('src/libs/**/*.js')
-	.pipe(plugins.concat('libs.js'))
-	.pipe(plugins.if(env === "ftp", conn.dest(path.build.js)))
-	.pipe(plugins.if(env === "local", gulp.dest(path.build.js)))
-		
-	return 	gulp.src(['src/libs/**/*.png', 'src/libs/**/*.gif', 'src/libs/**/*.jpg', 'src/libs/**/*.svg'])
-	.pipe(plugins.flatten())
-	.pipe(plugins.if(env === "ftp", conn.dest(path.build.img)))
-	.pipe(plugins.if(env === "local", gulp.dest(path.build.img)))
 }
 /*inject css js to index file*/
 function inc_build() {
   var stream = gulp.src('src/template/layouts/master.html')
     .pipe(plugins.inject(gulp.src([
-        root + 'js/**/*.js'
+        root + 'js/**/*.js', "!"+root + 'js/**/jquery.min.js'
    ], {
       read: false
     }), {
@@ -352,7 +322,6 @@ exports.sprite_build = sprite_build;
 exports.fonts_build = fonts_build;
 exports.inc_build = inc_build;
 exports.lib_build = lib_build;
-exports.lib_contact_build = lib_contact_build;
 exports.upload = upload;
 ////////
 exports.default = gulp.series(build,
