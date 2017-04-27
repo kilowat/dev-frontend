@@ -170,8 +170,8 @@ function sprite_build() {
   var spriteData = gulp.src('src/sprites/*.png')
     .pipe(plugins.newer(path.build.img))
     .pipe(plugins.spritesmith({
-      imgName: path.build.sprite + 'sprite.png',
-      imgPath:path.build.sprite,
+      imgName: 'sprite.png',
+      imgPath:path.build.sprite+'sprite.png',
       cssName: '_sprite.scss',
       cssTemplate: 'src/style/helpers/_sprite_template.handlebars'
     }));
